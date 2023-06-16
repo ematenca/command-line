@@ -4,14 +4,20 @@
     {
         public static void DisplayWelcomeMessage()
         {
-            Console.Write("Bienvenido a la aplicación de línea de comandos.");
-            Console.WriteLine(Environment.NewLine);
+            Console.WriteLine("Bienvenido a la aplicación de línea de comandos.");
+            Console.WriteLine();
+        }
+
+        public static void DisplayPrompt()
+        {
+            Console.WriteLine();
+            Console.Write("> ");
         }
 
         public static void DisplayHelp(Dictionary<string, string> commands)
         {
-            Console.Write("Comandos disponibles:");
-            Console.WriteLine(Environment.NewLine);
+            Console.WriteLine($"Comandos disponibles:");
+            Console.WriteLine();
 
             foreach (var command in commands)
             {
@@ -19,9 +25,9 @@
             }
         }
 
-        public static void DisplayErrorMessage(string message)
+        public static void DisplayMessage(string message)
         {
-            Console.WriteLine($"Error: {message}");
+            Console.WriteLine($"{message}");
         }
     }
 }

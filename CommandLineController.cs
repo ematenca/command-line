@@ -4,53 +4,62 @@ namespace CommandLine
 {
     public class CommandLineController
     {
+        /// <summary>
+        /// Inicia el bucle principal de la aplicación de línea de comandos.
+        /// Muestra el mensaje de bienvenida y la ayuda inicial.
+        /// Lee los comandos de entrada del usuario y ejecuta las operaciones correspondientes.
+        /// </summary>
         public void Start()
         {
             CommandLineView.DisplayWelcomeMessage();
             CommandLineView.DisplayHelp(CommandLineModel.GetCommands());
+            CommandLineView.DisplayMessage($"{Environment.NewLine}* Si desea utilizar espacios en los nombres de archivos o rutas, inserte los mismos entre comillas.");
 
             bool exit = false;
             while (!exit)
             {
                 try
                 {
-                    Console.Write(Environment.NewLine);
-                    Console.Write("> ");
+                    CommandLineView.DisplayPrompt();
                     string? input = Console.ReadLine();
 
                     if (string.IsNullOrEmpty(input))
                     {
-                        CommandLineView.DisplayErrorMessage("Comando no reconocido. Escribe 'help' para ver los comandos disponibles.");
+                        CommandLineView.DisplayMessage("Comando no reconocido. Escribe 'help' para ver los comandos disponibles.");
                         continue;
                     }
 
                     string[] arguments = SplitInputBySpacesAndQuotes(input);
+                    string command = arguments[0].ToLower();
 
-                    string? command = arguments.Length <= 3 ? arguments[0].ToLower() : null;
+                    string message = string.Empty;
                     switch (command)
                     {
                         case "tch":
-                            CommandLineModel.CreateFile(arguments);
+                            message = CommandLineModel.CreateFile(arguments);
                             break;
                         case "mv":
-                            CommandLineModel.RenameOrMoveFile(arguments);
+                            message = CommandLineModel.RenameOrMoveFile(arguments);
                             break;
                         case "ls":
-                            CommandLineModel.ListFiles(arguments);
+                            message = CommandLineModel.ListFiles(arguments);
                             break;
                         case "cd":
-                            CommandLineModel.OpenDirectory(arguments);
-                            break;
-                        case "help":
-                            CommandLineView.DisplayHelp(CommandLineModel.GetCommands());
+                            message = CommandLineModel.OpenDirectory(arguments);
                             break;
                         case "exit":
                             exit = true;
                             break;
+                        case "help":
+                            CommandLineView.DisplayHelp(CommandLineModel.GetCommands());
+                            CommandLineView.DisplayMessage($"{Environment.NewLine}* Si desea utilizar espacios en los nombres de archivos o rutas, inserte los mismos entre comillas.");
+                            continue;
                         default:
-                            CommandLineView.DisplayErrorMessage("Comando no reconocido. Escribe 'help' para ver los comandos disponibles.");
-                            break;
+                            CommandLineView.DisplayMessage("Comando no reconocido. Escribe 'help' para ver los comandos disponibles.");
+                            continue;
                     }
+
+                    CommandLineView.DisplayMessage(message);
                 }
                 catch (Exception e)
                 {
@@ -58,6 +67,12 @@ namespace CommandLine
                 }
             }
         }
+
+        /// <summary>
+        /// Este método divide una cadena de entrada en elementos separados por espacios, teniendo en cuenta las comillas para mantener elementos entre comillas como una sola unidad.
+        /// </summary>
+        /// <param name="input">La cadena de entrada que se va a dividir.</param>
+        /// <returns>Un arreglo de cadenas que contiene los elementos obtenidos después de dividir la cadena de entrada.</returns>
         static string[] SplitInputBySpacesAndQuotes(string input)
         {
             List<string> pathElements = new List<string>();
