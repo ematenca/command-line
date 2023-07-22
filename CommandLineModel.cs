@@ -6,10 +6,7 @@ namespace CommandLine
 {
     public static class CommandLineModel
     {
-        public static string CurrentDirectory
-        {
-            get { return ConfigurationManager.AppSettings["CurrentDirectory"] ?? Directory.GetCurrentDirectory(); }
-        }
+        public static string CurrentDirectory => ConfigurationManager.AppSettings["CurrentDirectory"] ?? Directory.GetCurrentDirectory();
 
         /// <summary>
         /// Crea un archivo a partir de los argumentos proporcionados.
@@ -20,7 +17,7 @@ namespace CommandLine
         {
             string command = arguments[0];
 
-            if (arguments.Length <= 1)
+            if (arguments.Length == 1)
                 return $"El comando '{command}' debe tener un argumento válido: {command} [nombre de archivo].";
 
             if (arguments.Length > 2)
@@ -107,16 +104,16 @@ namespace CommandLine
             if (arguments.Length > 2)
                 return $"El comando '{command}' solo puede tener los siguientes argumentos: {command} o {command} -R.";
 
+            if (arguments.Length == 2 && arguments[1].ToLower() != "-r")
+                return $"El comando '{command}' debe tener un argumento válido: {command} -R.";
+
             string[] files = Directory.GetFiles(CurrentDirectory);
             string[] dirs = Directory.GetDirectories(CurrentDirectory);
 
-            if (arguments.Length == 2 && (arguments[1] == "-r" || arguments[1] == "-R"))
-                return ListFilesRecursively(CurrentDirectory, files, dirs);
+            if (arguments.Length == 1)
+                return ListFiles(CurrentDirectory, files, dirs);
 
-            if (arguments.Length == 2 && arguments[1] != "-r")
-                return $"El comando '{command}' debe tener un argumento válido: {command} -R.";
-
-            return ListFiles(CurrentDirectory, files, dirs);
+            return ListFilesRecursively(CurrentDirectory, files, dirs);
         }
 
         /// <summary>
@@ -154,18 +151,6 @@ namespace CommandLine
             }
 
             return message.ToString().TrimEnd();
-        }
-
-        /// <summary>
-        /// Verifica si un directorio contiene archivos o subdirectorios.
-        /// </summary>
-        /// <param name="directory">El nombre del directorio.</param>
-        /// <param name="path">La ruta del directorio principal.</param>
-        /// <returns>True si el directorio contiene archivos o subdirectorios; de lo contrario, false.</returns>
-        private static bool ContainsFilesOrDirectories(string path, string directory)
-        {
-            string fullPath = Path.Combine(path, directory);
-            return Directory.GetFiles(fullPath).Length > 0 || Directory.GetDirectories(fullPath).Length > 0;
         }
 
         /// <summary>
@@ -218,16 +203,6 @@ namespace CommandLine
         }
 
         /// <summary>
-        /// Obtiene la ruta completa combinando la ruta actual del directorio y una ruta relativa.
-        /// </summary>
-        /// <param name="path">La ruta relativa a combinar.</param>
-        /// <returns>La ruta completa resultante.</returns>
-        private static string GetFullPath(string path)
-        {
-            return Path.Combine(CurrentDirectory, path);
-        }
-
-        /// <summary>
         /// Este método devuelve un diccionario que contiene los comandos disponibles en la aplicación y su descripción correspondiente.
         /// </summary>
         /// <returns>Un diccionario que mapea cada comando con su descripción.</returns>
@@ -244,6 +219,28 @@ namespace CommandLine
                 { "help", "Permite ver un listado de cada comando y su descripción." },
                 { "exit", "Finaliza la aplicación."}
             };
+        }
+
+        /// <summary>
+        /// Verifica si un directorio contiene archivos o subdirectorios.
+        /// </summary>
+        /// <param name="directory">El nombre del directorio.</param>
+        /// <param name="path">La ruta del directorio principal.</param>
+        /// <returns>True si el directorio contiene archivos o subdirectorios; de lo contrario, false.</returns>
+        private static bool ContainsFilesOrDirectories(string path, string directory)
+        {
+            string fullPath = Path.Combine(path, directory);
+            return Directory.GetFiles(fullPath).Length > 0 || Directory.GetDirectories(fullPath).Length > 0;
+        }
+
+        /// <summary>
+        /// Obtiene la ruta completa combinando la ruta actual del directorio y una ruta relativa.
+        /// </summary>
+        /// <param name="path">La ruta relativa a combinar.</param>
+        /// <returns>La ruta completa resultante.</returns>
+        private static string GetFullPath(string path)
+        {
+            return Path.Combine(CurrentDirectory, path);
         }
     }
 }
